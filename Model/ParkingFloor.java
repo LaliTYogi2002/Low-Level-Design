@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import Enum.VehicleType;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ParkingFloor {
 
     String id;
@@ -13,7 +15,7 @@ public class ParkingFloor {
 
     public ParkingFloor(String id) {
         this.id = id;
-        this.parkingSpotMap = new HashMap<>();
+        this.parkingSpotMap = new ConcurrentHashMap<>();
     }
 
     public void addSpot(ParkingSpot spot) {
@@ -41,6 +43,17 @@ public class ParkingFloor {
         for (ParkingSpot spot : parkingSpotMap.values()) {
             if (spot.getVehicleType() == vehicleType && !spot.isOccupied()) {
                 return Optional.of(spot);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<ParkingSpot> allocateSpot(VehicleType vehicleType) {
+        for (ParkingSpot spot : parkingSpotMap.values()) {
+            if (spot.getVehicleType() == vehicleType && !spot.isOccupied()) {
+                if (spot.tryOccupy()) {
+                    return Optional.of(spot);
+                }
             }
         }
         return Optional.empty();

@@ -98,6 +98,20 @@ ParkingLot/
 4. `PaymentProcessor` executes payment using the selected `PaymentStrategy` (`UPI` or `Card`).
 5. On successful payment, the ticket is removed from active tickets.
 
+## 🔒 Thread Safety & Multi-Threading Concurrency
+
+The system handles high-concurrency scenarios where multiple vehicles arrive at different `EntryGate`s simultaneously:
+
+1. **Atomic Spot Allocation (CAS)**:
+   - Uses `AtomicBoolean.compareAndSet(false, true)` (`tryOccupy()`) at the `ParkingSpot` level.
+   - Eliminates Check-Then-Act race conditions without coarse-grained global locks on `ParkingLot`.
+2. **Concurrent Data Structures**:
+   - Uses `ConcurrentHashMap` for `activeTickets` and floor spot mappings to prevent map corruption during concurrent access.
+3. **Thread-Safe Singleton**:
+   - Uses double-checked locking with `volatile` for `ParkingLot.getInstance()`.
+4. **Spot Cleanup on Unpark**:
+   - `spot.vacate()` atomically frees the spot when a vehicle leaves, allowing waiting threads to park safely.
+
 ---
 
 ## 🛠 Prerequisites & Running the Code

@@ -35,8 +35,15 @@ public class ParkingSpot {
         return isOccupied.get();
     }
 
+    public boolean tryOccupy() {
+        return isOccupied.compareAndSet(false, true);
+    }
+
+    public void vacate() {
+        isOccupied.set(false);
+    }
+
     public void setOccupied(boolean occupied) {
-        isOccupied.compareAndSet(!occupied, occupied);
-        // isOccupied.set(occupied);
+        isOccupied.set(occupied);
     }
 }
