@@ -14,6 +14,15 @@ import Enum.PaymentMode;
 import Enum.VehicleType;
 import Factory.VehicleFactory;
 
+/**
+ * Test Driver to verify Thread Safety and Concurrency in the Parking Lot System.
+ * 
+ * WHY CountDownLatch IS USED:
+ * - CountDownLatch(1) 'startSignal' acts like a starting pistol at a race.
+ *   All worker threads start up, run startSignal.await(), and PAUSE.
+ * - When main thread calls startSignal.countDown(), ALL worker threads are unblocked 
+ *   at the exact same nanosecond, simulating true simultaneous arrival at multiple gates!
+ */
 class Main {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("=== INITIALIZING PARKING LOT SYSTEM ===");
@@ -40,7 +49,7 @@ class Main {
         // Thread 1: Car 1 arrives at Gate 1
         Thread t1 = new Thread(() -> {
             try {
-                startSignal.await(); // Wait for sync start
+                startSignal.await(); // Wait for simultaneous starting gun
                 System.out.println("[Thread-1] Gate-E1 attempting to park CAR-101...");
                 ticket1[0] = gate1.parkVehicle(car1);
             } catch (InterruptedException e) {
@@ -53,7 +62,7 @@ class Main {
         // Thread 2: Car 2 arrives at Gate 2
         Thread t2 = new Thread(() -> {
             try {
-                startSignal.await(); // Wait for sync start
+                startSignal.await(); // Wait for simultaneous starting gun
                 System.out.println("[Thread-2] Gate-E2 attempting to park CAR-102...");
                 ticket2[0] = gate2.parkVehicle(car2);
             } catch (InterruptedException e) {
